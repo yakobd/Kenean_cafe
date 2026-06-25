@@ -2,38 +2,38 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, AlertTriangle, Package, TrendingUp } from 'lucide-react';
-import { InventoryItem } from '@/types/admin';
+import { MasterInventoryItem } from '@/types/inventory';
 import Toast from '@/components/Toast';
 
 export default function InventoryManager() {
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [inventory, setInventory] = useState<MasterInventoryItem[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [restockingItem, setRestockingItem] = useState<string | null>(null);
   const [restockAmount, setRestockAmount] = useState('');
 
   useEffect(() => {
-    const stored = localStorage.getItem('cafe-inventory');
+    const stored = localStorage.getItem('cafe-master-inventory');
     if (stored) {
       setInventory(JSON.parse(stored));
     } else {
-      // Initialize with default inventory
-      const defaultInventory: InventoryItem[] = [
-        { id: '1', name: 'Coffee Beans', nameAmharic: 'ቡና', quantity: 50, unit: 'kg', lowStockThreshold: 10, lastUpdated: new Date() },
-        { id: '2', name: 'Milk', nameAmharic: 'ወተት', quantity: 30, unit: 'liters', lowStockThreshold: 5, lastUpdated: new Date() },
-        { id: '3', name: 'Sugar', nameAmharic: 'ስኳር', quantity: 25, unit: 'kg', lowStockThreshold: 5, lastUpdated: new Date() },
-        { id: '4', name: 'Flour', nameAmharic: 'ዱቄት', quantity: 40, unit: 'kg', lowStockThreshold: 10, lastUpdated: new Date() },
-        { id: '5', name: 'Eggs', nameAmharic: 'እንቁላል', quantity: 120, unit: 'pieces', lowStockThreshold: 24, lastUpdated: new Date() },
-        { id: '6', name: 'Butter', nameAmharic: 'ቅቤ', quantity: 15, unit: 'kg', lowStockThreshold: 3, lastUpdated: new Date() },
+      // Initialize with default inventory matching MasterInventoryItem shape
+      const defaultInventory: MasterInventoryItem[] = [
+        { id: '1', name: 'Coffee Beans', nameAmharic: 'ቡና', category: 'Raw Materials', quantity: 50, unit: 'kg', unitPrice: 450, lowStockThreshold: 10, lastUpdated: new Date() },
+        { id: '2', name: 'Milk', nameAmharic: 'ወተት', category: 'Dairy', quantity: 30, unit: 'liters', unitPrice: 25, lowStockThreshold: 5, lastUpdated: new Date() },
+        { id: '3', name: 'Sugar', nameAmharic: 'ስኳር', category: 'Raw Materials', quantity: 25, unit: 'kg', unitPrice: 35, lowStockThreshold: 5, lastUpdated: new Date() },
+        { id: '4', name: 'Flour', nameAmharic: 'ዱቄት', category: 'Raw Materials', quantity: 40, unit: 'kg', unitPrice: 28, lowStockThreshold: 10, lastUpdated: new Date() },
+        { id: '5', name: 'Eggs', nameAmharic: 'እንቁላል', category: 'Dairy', quantity: 120, unit: 'pieces', unitPrice: 3, lowStockThreshold: 24, lastUpdated: new Date() },
+        { id: '6', name: 'Butter', nameAmharic: 'ቅቤ', category: 'Dairy', quantity: 15, unit: 'kg', unitPrice: 180, lowStockThreshold: 3, lastUpdated: new Date() },
       ];
       setInventory(defaultInventory);
-      localStorage.setItem('cafe-inventory', JSON.stringify(defaultInventory));
+      localStorage.setItem('cafe-master-inventory', JSON.stringify(defaultInventory));
     }
   }, []);
 
-  const saveInventory = (items: InventoryItem[]) => {
+  const saveInventory = (items: MasterInventoryItem[]) => {
     setInventory(items);
-    localStorage.setItem('cafe-inventory', JSON.stringify(items));
+    localStorage.setItem('cafe-master-inventory', JSON.stringify(items));
   };
 
   const updateQuantity = (id: string, newQuantity: number) => {

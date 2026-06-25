@@ -265,10 +265,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
 
     // Check for low stock (placeholder - would need inventory system)
-    const inventory = localStorage.getItem('cafe-inventory');
+    const inventory = localStorage.getItem('cafe-master-inventory');
     if (inventory) {
       const items = JSON.parse(inventory);
-      const lowStockItems = items.filter((item: any) => item.quantity < item.minQuantity);
+      const lowStockItems = items.filter((item: any) => item.quantity < item.lowStockThreshold);
       
       lowStockItems.forEach((item: any) => {
         const existingNotificationIds = notifications.map(n => n.orderId);

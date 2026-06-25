@@ -19,6 +19,18 @@ export default function OrdersPage() {
   const [toastType, setToastType] = useState<'success' | 'error' | 'info' | 'warning'>('success');
   const [feedback, setFeedback] = useState('');
 
+  // Keep cafe-active-order in sync so NotificationContext can find the customer's order
+  useEffect(() => {
+    const order = orderSession.activeOrder;
+    if (!order) return;
+
+    if (order.status === 'completed' || order.status === 'rejected') {
+      localStorage.removeItem('cafe-active-order');
+    } else {
+      localStorage.setItem('cafe-active-order', JSON.stringify(order));
+    }
+  }, [orderSession.activeOrder]);
+
   // Poll localStorage for status updates from waiter/cashier
   useEffect(() => {
     const checkForUpdates = () => {

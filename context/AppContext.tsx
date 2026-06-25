@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { CartItem } from '@/types/menu';
 import { Order, OrderSession, OrderStatus } from '@/types/order';
 
@@ -24,12 +24,25 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = localStorage.getItem('cafe-cart');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [orderSession, setOrderSession] = useState<OrderSession>({
     orders: [],
     activeOrder: null,
   });
   const [hasNotification, setHasNotification] = useState(false);
+
+  // Persist cart to localStorage on every change
+  useEffect(() => {
+    localStorage.setItem('cafe-cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const addToCart = (item: CartItem) => {
     setCartItems((prev) => {
@@ -96,6 +109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('cafe-orders', JSON.stringify(allOrders));
 
     clearCart();
+    localStorage.removeItem('cafe-cart');
     setHasNotification(true);
   };
 
@@ -116,9 +130,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const updatedOrders = storedOrders.map((order: Order) =>
       order.id === orderId ? { ...order, status } : order
     );
-    localStorage.setItem('cafe-orders', JSON.stringify(updatedOrders));
 
-    // Archive completed or rejected orders to history
+    // Archive completed or rejected orders to history and remove from active list
     if (status === 'completed' || status === 'rejected') {
       const orderToArchive = updatedOrders.find((o: Order) => o.id === orderId);
       if (orderToArchive) {
@@ -126,6 +139,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         history.push(orderToArchive);
         localStorage.setItem('cafe-orders-history', JSON.stringify(history));
       }
+      const activeOrders = updatedOrders.filter((o: Order) => o.id !== orderId);
+      localStorage.setItem('cafe-orders', JSON.stringify(activeOrders));
+    } else {
+      localStorage.setItem('cafe-orders', JSON.stringify(updatedOrders));
     }
   };
 
